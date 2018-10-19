@@ -109,35 +109,6 @@ describe('when creating instance of PolicyEngine', () => {
   });
 
 
-  it('then it should error if config missing applications section', () => {
-    const config = JSON.parse(JSON.stringify(correctConfig));
-    config.applications = undefined;
-
-    expect(() => new PolicyEngine(config)).toThrowError('Must provide applications config');
-  });
-
-  it('then it should error if config missing applications.service', () => {
-    const config = JSON.parse(JSON.stringify(correctConfig));
-    config.applications.service = undefined;
-
-    expect(() => new PolicyEngine(config)).toThrowError('applications.service must be specified');
-  });
-
-  it('then it should error if config missing applications.service.url', () => {
-    const config = JSON.parse(JSON.stringify(correctConfig));
-    config.applications.service.url = undefined;
-
-    expect(() => new PolicyEngine(config)).toThrowError('applications.service.url must be specified');
-  });
-
-  it('then it should error if config missing applications.service.auth', () => {
-    const config = JSON.parse(JSON.stringify(correctConfig));
-    config.applications.service.auth = undefined;
-
-    expect(() => new PolicyEngine(config)).toThrowError('applications.service.auth must be specified');
-  });
-
-
   it('then it should error if config missing access section', () => {
     const config = JSON.parse(JSON.stringify(correctConfig));
     config.access = undefined;
