@@ -204,4 +204,82 @@ describe('When getting available roles for a user', () => {
       allServiceRoles[2],
     ]);
   });
+
+  it('then it should not try and get user from directories if userId is undefined', async () => {
+    accessClient.getPoliciesForService.mockReturnValue([
+      {
+        id: 'policy-1',
+        name: 'policy one',
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: 'organisation.id',
+            operator: 'is',
+            value: [organisationId],
+          },
+        ],
+        roles: [
+          allServiceRoles[0],
+          allServiceRoles[2],
+        ],
+      },
+    ]);
+
+    await engine.getRolesAvailableForUser(undefined, organisationId, serviceId, correlationId);
+
+    expect(directoriesClient.getUserById).toHaveBeenCalledTimes(0);
+  });
+
+  it('then it should return policy roles when user matches organisation criteria and userId is undefined', async () => {
+    accessClient.getPoliciesForService.mockReturnValue([
+      {
+        id: 'policy-1',
+        name: 'policy one',
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: 'organisation.id',
+            operator: 'is',
+            value: [organisationId],
+          },
+        ],
+        roles: [
+          allServiceRoles[0],
+          allServiceRoles[2],
+        ],
+      },
+    ]);
+
+    const actual = await engine.getRolesAvailableForUser(undefined, organisationId, serviceId, correlationId);
+
+    expect(actual).toEqual([
+      allServiceRoles[0],
+      allServiceRoles[2],
+    ]);
+  });
+
+  it('then it should not return policy roles criteria is based on user and userId is undefined', async () => {
+    accessClient.getPoliciesForService.mockReturnValue([
+      {
+        id: 'policy-1',
+        name: 'policy one',
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: 'id',
+            operator: 'is',
+            value: [userId],
+          },
+        ],
+        roles: [
+          allServiceRoles[0],
+          allServiceRoles[2],
+        ],
+      },
+    ]);
+
+    const actual = await engine.getRolesAvailableForUser(undefined, organisationId, serviceId, correlationId);
+
+    expect(actual).toEqual([]);
+  });
 });
