@@ -12,6 +12,7 @@ const directoriesClient = {
 };
 const organisationsClient = {
   getUserOrganisations: jest.fn(),
+  getOrganisation: jest.fn(),
 };
 const accessClient = {
   getPoliciesForService: jest.fn(),
@@ -59,6 +60,7 @@ describe('When getting available roles for a user', () => {
     DirectoriesClient.mockImplementation(() => directoriesClient);
 
     organisationsClient.getUserOrganisations.mockReset().mockReturnValue(userOrganisations);
+    organisationsClient.getOrganisation.mockReset().mockReturnValue(userOrganisations[0].organisation);
     OrganisationsClient.mockImplementation(() => organisationsClient);
 
     accessClient.getPoliciesForService.mockReset();
