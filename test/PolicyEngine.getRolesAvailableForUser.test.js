@@ -284,4 +284,34 @@ describe('When getting available roles for a user', () => {
 
     expect(actual).toEqual([]);
   });
+
+  it('then it should treat no values as a false when applying conditions', async () => {
+    accessClient.getPoliciesForService.mockReturnValue([
+      {
+        id: 'policy-1',
+        name: 'policy one',
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: 'role.id',
+            operator: 'is_not',
+            value: 'something',
+          },
+        ],
+        roles: [
+          allServiceRoles[0],
+        ],
+      },
+    ]);
+    accessClient.getUserAccessToServiceAtOrganisation.mockReset().mockReturnValue({
+      userId: 'user-1',
+      organisationId: 'organisation-1',
+      serviceId: 'service-1',
+      roles: []
+    });
+
+    const actual = await engine.getRolesAvailableForUser(undefined, organisationId, serviceId, correlationId);
+
+    expect(actual).toEqual([allServiceRoles[0]]);
+  })
 });
