@@ -1,4 +1,4 @@
-const MinimumConstraint = require('./../../lib/contraints/MinimumConstraint');
+const MinimumConstraint = require('./../../lib/constraints/MinimumConstraint');
 
 describe('when validating selected roles against minimum constraint', () => {
   it('then it should not return exceptions if minimum number is met', () => {

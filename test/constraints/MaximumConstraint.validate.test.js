@@ -1,4 +1,4 @@
-const MaximumConstraint = require('./../../lib/contraints/MaximumConstraint');
+const MaximumConstraint = require('./../../lib/constraints/MaximumConstraint');
 
 describe('when validating selected roles against maximum constraint', () => {
   it('then it should not return exceptions if maximum number is met', () => {

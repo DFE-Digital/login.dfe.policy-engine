@@ -1,4 +1,4 @@
-const ParentChildConstraint = require('./../../lib/contraints/ParentChildConstraint');
+const ParentChildConstraint = require('./../../lib/constraints/ParentChildConstraint');
 
 describe('when validating selected roles against parent/child constraint', () => {
   let constraint = new ParentChildConstraint([
