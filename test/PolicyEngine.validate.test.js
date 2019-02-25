@@ -151,4 +151,136 @@ describe('when validating selected roles', () => {
       appliesTo: ['not-a-role-1', 'not-a-role-2'],
     });
   });
+
+  it('then it should apply minimum constraint if configured for service', async () => {
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(MinimumConstraint).toHaveBeenCalledTimes(1);
+    expect(MinimumConstraint).toHaveBeenCalledWith(1);
+    expect(minimumConstraint.validate).toHaveBeenCalledTimes(1);
+    expect(minimumConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
+  });
+
+  it.skip('then it should not apply minimum constraint if not configured for service', async () => {
+    // TODO: configure minimum constraint to not be required
+
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(MinimumConstraint).toHaveBeenCalledTimes(0);
+    expect(minimumConstraint.validate).toHaveBeenCalledTimes(0);
+  });
+
+  it('then it should return exceptions if minimum constraint fails', async () => {
+    const constraintError = {
+      constraint: 'MinimumConstraint',
+      message: 'Expected a minimum of X roles to be selected but received X selected roles',
+      appliesTo: selectedRoleIds,
+    };
+    minimumConstraint.validate.mockReturnValue([constraintError]);
+
+    const actual = await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(actual).toBeDefined();
+    expect(actual).toBeInstanceOf(Array);
+    expect(actual).toHaveLength(1);
+    expect(actual[0]).toEqual(constraintError);
+  });
+
+  it('then it should apply maximum constraint if configured for service', async () => {
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(MaximumConstraint).toHaveBeenCalledTimes(1);
+    expect(MaximumConstraint).toHaveBeenCalledWith(2);
+    expect(maximumConstraint.validate).toHaveBeenCalledTimes(1);
+    expect(maximumConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
+  });
+
+  it.skip('then it should not apply maximum constraint if not configured for service', async () => {
+    // TODO: configure minimum constraint to not be required
+
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(MaximumConstraint).toHaveBeenCalledTimes(0);
+    expect(maximumConstraint.validate).toHaveBeenCalledTimes(0);
+  });
+
+  it('then it should return exceptions if maximum constraint fails', async () => {
+    const constraintError = {
+      constraint: 'MaximumConstraint',
+      message: 'Expected a maximum of X roles to be selected but received X selected roles',
+      appliesTo: selectedRoleIds,
+    };
+    maximumConstraint.validate.mockReturnValue([constraintError]);
+
+    const actual = await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(actual).toBeDefined();
+    expect(actual).toBeInstanceOf(Array);
+    expect(actual).toHaveLength(1);
+    expect(actual[0]).toEqual(constraintError);
+  });
+
+  it('then it should apply parent/child constraint if configured for service', async () => {
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(ParentChildConstraint).toHaveBeenCalledTimes(1);
+    expect(ParentChildConstraint).toHaveBeenCalledWith(allServiceRoles);
+    expect(parentChildConstraint.validate).toHaveBeenCalledTimes(1);
+    expect(parentChildConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
+  });
+
+  it.skip('then it should not apply parent/child constraint if not configured for service', async () => {
+    // TODO: configure minimum constraint to not be required
+
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(ParentChildConstraint).toHaveBeenCalledTimes(0);
+    expect(parentChildConstraint.validate).toHaveBeenCalledTimes(0);
+  });
+
+  it('then it should return exceptions if parent/child constraint fails', async () => {
+    const constraintError = {
+      constraint: 'ParentChildConstraint',
+      message: 'A child cannot be selected without a parent',
+      appliesTo: selectedRoleIds,
+    };
+    parentChildConstraint.validate.mockReturnValue([constraintError]);
+
+    const actual = await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(actual).toBeDefined();
+    expect(actual).toBeInstanceOf(Array);
+    expect(actual).toHaveLength(1);
+    expect(actual[0]).toEqual(constraintError);
+  });
+
+  it('then it should return exceptions if all constraints fails', async () => {
+    const minimumConstraintError = {
+      constraint: 'MinimumConstraint',
+      message: 'Expected a minimum of X roles to be selected but received X selected roles',
+      appliesTo: selectedRoleIds,
+    };
+    minimumConstraint.validate.mockReturnValue([minimumConstraintError]);
+    const maximumConstraintError = {
+      constraint: 'MaximumConstraint',
+      message: 'Expected a maximum of X roles to be selected but received X selected roles',
+      appliesTo: selectedRoleIds,
+    };
+    maximumConstraint.validate.mockReturnValue([maximumConstraintError]);
+    const parentChildConstraintError = {
+      constraint: 'ParentChildConstraint',
+      message: 'A child cannot be selected without a parent',
+      appliesTo: selectedRoleIds,
+    };
+    parentChildConstraint.validate.mockReturnValue([parentChildConstraintError]);
+
+    const actual = await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(actual).toBeDefined();
+    expect(actual).toBeInstanceOf(Array);
+    expect(actual).toHaveLength(3);
+    expect(actual[0]).toEqual(minimumConstraintError);
+    expect(actual[1]).toEqual(maximumConstraintError);
+    expect(actual[2]).toEqual(parentChildConstraintError);
+  });
 });
