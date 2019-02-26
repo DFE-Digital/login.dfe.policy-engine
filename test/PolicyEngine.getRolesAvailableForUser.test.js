@@ -87,6 +87,12 @@ describe('When getting available roles for a user', () => {
           auth: {},
         }
       },
+      applications: {
+        service: {
+          url: 'https://applications.unit.test',
+          auth: {},
+        }
+      },
     })
   });
 

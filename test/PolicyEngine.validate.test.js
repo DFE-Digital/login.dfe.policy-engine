@@ -1,6 +1,7 @@
 jest.mock('./../lib/infrastructure/directories');
 jest.mock('./../lib/infrastructure/organisations');
 jest.mock('./../lib/infrastructure/access');
+jest.mock('./../lib/infrastructure/applications');
 jest.mock('./../lib/constraints/MinimumConstraint');
 jest.mock('./../lib/constraints/MaximumConstraint');
 jest.mock('./../lib/constraints/ParentChildConstraint');
@@ -8,6 +9,7 @@ jest.mock('./../lib/constraints/ParentChildConstraint');
 const DirectoriesClient = require('./../lib/infrastructure/directories');
 const OrganisationsClient = require('./../lib/infrastructure/organisations');
 const AccessClient = require('./../lib/infrastructure/access');
+const ApplicationsClient = require('./../lib/infrastructure/applications');
 const MinimumConstraint = require('./../lib/constraints/MinimumConstraint');
 const MaximumConstraint = require('./../lib/constraints/MaximumConstraint');
 const ParentChildConstraint = require('./../lib/constraints/ParentChildConstraint');
@@ -24,7 +26,9 @@ const accessClient = {
   getPoliciesForService: jest.fn(),
   getUserAccessToServiceAtOrganisation: jest.fn(),
   getRolesForService: jest.fn(),
-  getConstraintsForService: jest.fn(),
+};
+const applicationsClient = {
+  getService: jest.fn(),
 };
 const minimumConstraint = {
   validate: jest.fn(),
@@ -98,20 +102,19 @@ describe('when validating selected roles', () => {
     ]);
     accessClient.getUserAccessToServiceAtOrganisation.mockReset().mockReturnValue(userAccessToService);
     accessClient.getRolesForService.mockReset().mockReturnValue(allServiceRoles);
-    accessClient.getConstraintsForService.mockReset().mockReturnValue([
-      {
-        type: 'Minimum',
-        value: 1,
-      },
-      {
-        type: 'Maximum',
-        value: 2,
-      },
-      {
-        type: 'ParentChild',
-      },
-    ]);
     AccessClient.mockImplementation(() => accessClient);
+
+    applicationsClient.getService.mockReset().mockReturnValue({
+      id: serviceId,
+      relyingParty: {
+        params: {
+          minimumRolesRequired: 1,
+          maximumRolesAllowed: 2,
+          requireParentChild: true,
+        },
+      },
+    });
+    ApplicationsClient.mockImplementation(() => applicationsClient);
 
     minimumConstraint.validate.mockReset().mockReturnValue([]);
     MinimumConstraint.mockReset().mockImplementation(() => minimumConstraint);
@@ -141,7 +144,13 @@ describe('when validating selected roles', () => {
           auth: {},
         }
       },
-    })
+      applications: {
+        service: {
+          url: 'https://applications.unit.test',
+          auth: {},
+        }
+      },
+    });
   });
 
   it('then it should not return any exceptions if all roles available after application policies and no contraints violated', async () => {
@@ -176,15 +185,15 @@ describe('when validating selected roles', () => {
   });
 
   it('then it should not apply minimum constraint if not configured for service', async () => {
-    accessClient.getConstraintsForService.mockReset().mockReturnValue([
-      {
-        type: 'Maximum',
-        value: 2,
+    applicationsClient.getService.mockReturnValue({
+      id: serviceId,
+      relyingParty: {
+        params: {
+          maximumRolesAllowed: 2,
+          requireParentChild: true,
+        },
       },
-      {
-        type: 'ParentChild',
-      },
-    ]);
+    });
 
     await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
 
@@ -218,15 +227,15 @@ describe('when validating selected roles', () => {
   });
 
   it('then it should not apply maximum constraint if not configured for service', async () => {
-    accessClient.getConstraintsForService.mockReset().mockReturnValue([
-      {
-        type: 'Minimum',
-        value: 1,
+    applicationsClient.getService.mockReturnValue({
+      id: serviceId,
+      relyingParty: {
+        params: {
+          minimumRolesRequired: 1,
+          requireParentChild: true,
+        },
       },
-      {
-        type: 'ParentChild',
-      },
-    ]);
+    });
 
     await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
 
@@ -260,16 +269,15 @@ describe('when validating selected roles', () => {
   });
 
   it('then it should not apply parent/child constraint if not configured for service', async () => {
-    accessClient.getConstraintsForService.mockReset().mockReturnValue([
-      {
-        type: 'Minimum',
-        value: 1,
+    applicationsClient.getService.mockReturnValue({
+      id: serviceId,
+      relyingParty: {
+        params: {
+          minimumRolesRequired: 1,
+          maximumRolesAllowed: 2,
+        },
       },
-      {
-        type: 'Maximum',
-        value: 2,
-      },
-    ]);
+    });
 
     await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
 
