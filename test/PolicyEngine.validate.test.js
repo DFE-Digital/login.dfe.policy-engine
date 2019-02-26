@@ -32,12 +32,15 @@ const applicationsClient = {
 };
 const minimumConstraint = {
   validate: jest.fn(),
+  apply: jest.fn(),
 };
 const maximumConstraint = {
   validate: jest.fn(),
+  apply: jest.fn(),
 };
 const parentChildConstraint = {
   validate: jest.fn(),
+  apply: jest.fn(),
 };
 
 const allServiceRoles = [
@@ -116,12 +119,15 @@ describe('when validating selected roles', () => {
     });
     ApplicationsClient.mockImplementation(() => applicationsClient);
 
+    minimumConstraint.apply.mockReset().mockReturnValue([]);
     minimumConstraint.validate.mockReset().mockReturnValue([]);
     MinimumConstraint.mockReset().mockImplementation(() => minimumConstraint);
 
+    maximumConstraint.apply.mockReset().mockReturnValue([]);
     maximumConstraint.validate.mockReset().mockReturnValue([]);
     MaximumConstraint.mockReset().mockImplementation(() => maximumConstraint);
 
+    parentChildConstraint.apply.mockReset().mockReturnValue([]);
     parentChildConstraint.validate.mockReset().mockReturnValue([]);
     ParentChildConstraint.mockReset().mockImplementation(() => parentChildConstraint);
 
