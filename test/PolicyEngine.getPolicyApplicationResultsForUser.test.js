@@ -144,6 +144,7 @@ describe('When getting available roles for a user', () => {
 
     expect(actual).toMatchObject({
       rolesAvailableToUser: allServiceRoles,
+      serviceAvailableToUser: true,
     });
   });
 
