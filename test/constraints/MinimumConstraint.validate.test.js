@@ -34,7 +34,7 @@ describe('when validating selected roles against minimum constraint', () => {
     expect(actual).toHaveLength(1);
     expect(actual[0]).toMatchObject({
       constraint: 'MinimumConstraint',
-      message: 'Expected a minimum of 3 roles to be selected but received 2 selected roles',
+      message: 'At least 3 roles must be selected',
       appliesTo: ['role-1', 'role-2'],
     });
   });
