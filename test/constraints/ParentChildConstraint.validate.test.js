@@ -27,7 +27,7 @@ describe('when validating selected roles against parent/child constraint', () =>
     expect(actual).toHaveLength(1);
     expect(actual[0]).toMatchObject({
       constraint: 'ParentChildConstraint',
-      message: 'A parent cannot be selected without a child',
+      message: 'A parent role cannot be selected without at least one child role selected',
       appliesTo: ['parent-1'],
     });
   });
@@ -42,7 +42,7 @@ describe('when validating selected roles against parent/child constraint', () =>
     expect(actual).toHaveLength(1);
     expect(actual[0]).toMatchObject({
       constraint: 'ParentChildConstraint',
-      message: 'A child cannot be selected without a parent',
+      message: 'A child role cannot be selected without a parent role selected',
       appliesTo: ['child-1a'],
     });
   });

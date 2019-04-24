@@ -34,7 +34,7 @@ describe('when validating selected roles against maximum constraint', () => {
     expect(actual).toHaveLength(1);
     expect(actual[0]).toMatchObject({
       constraint: 'MaximumConstraint',
-      message: 'Expected a maximum of 3 roles to be selected but received 4 selected roles',
+      message: 'A maximum of 3 roles can be selected',
       appliesTo: ['role-1', 'role-2', 'role-3', 'role-4'],
     });
   });
