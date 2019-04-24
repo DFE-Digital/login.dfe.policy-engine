@@ -2,9 +2,9 @@ const ParentChildConstraint = require('./../../lib/constraints/ParentChildConstr
 
 describe('when validating selected roles against parent/child constraint', () => {
   let constraint = new ParentChildConstraint([
-    { id: 'parent-1', name: 'Parent One', parentId: undefined },
-    { id: 'child-1a', name: 'Child One A', parentId: 'parent-1' },
-    { id: 'standalone-1', name: 'Standalone One', parentId: undefined },
+    { id: 'parent-1', name: 'Parent One', parent: undefined },
+    { id: 'child-1a', name: 'Child One A', parent: { id: 'parent-1' } },
+    { id: 'standalone-1', name: 'Standalone One', parent: undefined },
   ]);
 
   it('then it should not return exceptions if both a parent and a child are selected', () => {
