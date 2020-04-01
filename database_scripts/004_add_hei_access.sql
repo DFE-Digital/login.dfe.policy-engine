@@ -7,26 +7,26 @@ BEGIN TRAN AdditionalPolicy
  DECLARE @teacherEmpServiceId UNIQUEIDENTIFIER
  DECLARE @evolveEmpMatPolicyId UNIQUEIDENTIFIER
  DECLARE @evolveEmpPolicyId UNIQUEIDENTIFIER
- SET @policyid = newid();
- SET @teacherITTServiceId = (select top 1 id from [service] where name = 'Teacher Services - ITT Provider');
- SET @covUniOrgId = (select top 1 Id from [organisation] where UKPRN = '10001726' and URN = '133808');
- SET @boltonUniOrgId = (select top 1 Id from [organisation] where UKPRN = '10006841' and URN = '133794');
- SET @bathUniOrgId = (select top 1 Id from [organisation] where UKPRN = '10000571' and URN = '133790');
+ SET @policyid = NEWID();
+ SET @teacherITTServiceId = (SELECT TOP 1 id FROM [service] WHERE Name = 'Teacher Services - ITT Provider');
+ SET @covUniOrgId = (SELECT TOP 1 Id FROM [organisation] WHERE UKPRN = '10001726' AND URN = '133808');
+ SET @boltonUniOrgId = (SELECT TOP 1 Id FROM [organisation] WHERE UKPRN = '10006841' AND URN = '133794');
+ SET @bathUniOrgId = (SELECT TOP 1 Id FROM [organisation] WHERE UKPRN = '10000571' AND URN = '133790');
      INSERT INTO Policy (Id, Name, ApplicationId, Status, CreatedAt, UpdatedAt)
-     VALUES (@policyid, 'HEI Access', newid(), 1, getdate(), getdate());
+     VALUES (@policyid, 'Teacher Services - HEI Org Access Corrections', NEWID(), 1, GETDATE(), GETDATE());
      INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
-     VALUES (newid(), @policyid, 'organisation.category.id', 'is', @covUniOrgId, getdate(), getdate());
+     VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @covUniOrgId, GETDATE(), GETDATE());
      INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
-     VALUES (newid(), @policyid, 'organisation.category.id', 'is', @boltonUniOrgId, getdate(), getdate());
+     VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @boltonUniOrgId, GETDATE(), GETDATE());
      INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
-     VALUES (newid(), @policyid, 'organisation.category.id', 'is', @bathUniOrgId, getdate(), getdate());
+     VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @bathUniOrgId, GETDATE(), GETDATE());
      INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
-     VALUES (newid(), @policyid, 'organisation.category.id', 'is', @teacherITTServiceId, getdate(), getdate());
-SET @teacherEmpServiceId = (select top 1 id from [service] where Name = 'Teacher Services - Employer Access - Agent');
-SET @evolveEmpMatPolicyId = (select top 1 Id from policy where ApplicationId=@teacherEmpServiceId and Name = 'Evolve - Employer Access - Agent MAT');
+     VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @teacherITTServiceId, GETDATE(), GETDATE());
+SET @teacherEmpServiceId = (SELECT TOP 1 id FROM [service] WHERE Name = 'Teacher Services - Employer Access - Agent');
+SET @evolveEmpMatPolicyId = (SELECT TOP 1 Id FROM [policy] WHERE ApplicationId=@teacherEmpServiceId AND Name = 'Evolve - Employer Access - Agent MAT');
     INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
-    VALUES (newid(), @policyid, 'organisation.category.id', 'is', @evolveEmpMatPolicyId, getdate(), getdate());
-SET @evolveEmpPolicyId = (select top 1 Id from policy where ApplicationId=@teacherEmpServiceId and Name = 'Evolve - Employer Access - Agent');
+    VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @evolveEmpMatPolicyId, GETDATE(), GETDATE());
+SET @evolveEmpPolicyId = (SELECT TOP 1 Id FROM [policy] WHERE ApplicationId=@teacherEmpServiceId AND Name = 'Evolve - Employer Access - Agent');
     INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
-    VALUES (newid(), @policyid, 'organisation.category.id', 'is', @evolveEmpPolicyId, getdate(), getdate());
+    VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @evolveEmpPolicyId, GETDATE(), GETDATE());
 ROLLBACK TRAN AdditionalPolicy
