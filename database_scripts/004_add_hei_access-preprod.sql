@@ -21,7 +21,7 @@ BEGIN TRAN AdditionalPolicy
      INSERT INTO Policy (Id, Name, ApplicationId, Status, CreatedAt, UpdatedAt)
      VALUES (@policyid, 'Teacher Services - HEI Org Access Corrections', NEWID(), 1, GETDATE(), GETDATE());
      INSERT INTO Role (Id, Name, ApplicationId, Status, CreatedAt, UpdatedAt, NumericId, ParentId)
-     VALUES (@ittProviderRoleId, 'Teacher Services - HEI Org Access', @teacherITTServiceId, 1, GETDATE(), GETDATE(), (SELECT MAX(NumericId) FROM Role) + 1, null)
+     VALUES (@ittProviderRoleId, 'Teacher Services - HEI Org Access', @teacherITTServiceId, 1, GETDATE(), GETDATE(), (SELECT MAX(NumericId) FROM Role) + 1, null);
      INSERT INTO PolicyRole (PolicyId, RoleId, CreatedAt, UpdatedAt)
      VALUES (@policyId, @ittProviderRoleId, GETDATE(), GETDATE());
      INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
@@ -37,7 +37,7 @@ SET @evolveEmpMatPolicyId = (SELECT TOP 1 Id from policy where ApplicationId=@te
     INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
     VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @evolveEmpMatPolicyId, GETDATE(), GETDATE());
     INSERT INTO Role (Id, Name, ApplicationId, Status, CreatedAt, UpdatedAt, NumericId, ParentId)
-    VALUES (@roleId, 'Teacher Services - HEI Org Access', @evolveEmpMatRoleId, 1, GETDATE(), GETDATE(), (SELECT MAX(NumericId) FROM Role) + 1, null)
+    VALUES (@roleId, 'Teacher Services - HEI Org Access', @evolveEmpMatRoleId, 1, GETDATE(), GETDATE(), (SELECT MAX(NumericId) FROM Role) + 1, null);
     INSERT INTO PolicyRole (PolicyId, RoleId, CreatedAt, UpdatedAt)
     VALUES (@policyId, @evolveEmpMatRoleId, GETDATE(), GETDATE());
 SET @evolveEmpRoleId = (SELECT TOP 1 Id from role where ApplicationId = @teacherEmpServiceId AND Name = 'Evolve - Employer Access - Prod');
@@ -45,7 +45,7 @@ SET @evolveEmpPolicyId = (SELECT TOP 1 Id FROM [policy] WHERE ApplicationId=@tea
     INSERT INTO PolicyCondition (Id, PolicyId, Field, Operator, Value, CreatedAt, UpdatedAt)
     VALUES (NEWID(), @policyid, 'organisation.category.id', 'is', @evolveEmpPolicyId, GETDATE(), GETDATE());
     INSERT INTO Role (Id, Name, ApplicationId, Status, CreatedAt, UpdatedAt, NumericId, ParentId)
-    VALUES (@roleId, 'Teacher Services - HEI Org Access', @evolveEmpRoleId, 1, GETDATE(), GETDATE(), (SELECT MAX(NumericId) FROM Role) + 1, null)
+    VALUES (@roleId, 'Teacher Services - HEI Org Access', @evolveEmpRoleId, 1, GETDATE(), GETDATE(), (SELECT MAX(NumericId) FROM Role) + 1, null);
     INSERT INTO PolicyRole (PolicyId, RoleId, CreatedAt, UpdatedAt)
     VALUES (@policyId, @evolveEmpRoleId, GETDATE(), GETDATE());
 ROLLBACK TRAN AdditionalPolicy
