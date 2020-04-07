@@ -11,6 +11,7 @@ BEGIN TRAN AdditionalPolicy
  DECLARE @evolveEmpRoleId UNIQUEIDENTIFIER
  DECLARE @evolveEmpMatRoleId UNIQUEIDENTIFIER
  SET @policyid = NEWID();
+ SET @teacherEmpServiceId = (SELECT TOP 1 id FROM [service] WHERE Name = 'Teacher Services - Employer Access - Agent');
  SET @teacherITTServiceId = (SELECT TOP 1 Id FROM [service] WHERE Name = 'Teacher Services - ITT Provider');
  SET @ittProviderRoleId = (SELECT TOP 1 Id FROM [role] WHERE ApplicationId = @teacherITTServiceId AND Name= 'ITT Provider');
  SET @evolveEmpRoleId = (SELECT TOP 1 Id from role where ApplicationId = @teacherEmpServiceId AND Name = 'Evolve - Employer Access - Prod');
