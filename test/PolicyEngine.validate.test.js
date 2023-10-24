@@ -13,6 +13,7 @@ const ApplicationsClient = require('./../lib/infrastructure/applications');
 const MinimumConstraint = require('./../lib/constraints/MinimumConstraint');
 const MaximumConstraint = require('./../lib/constraints/MaximumConstraint');
 const ParentChildConstraint = require('./../lib/constraints/ParentChildConstraint');
+const SelectionConstraint = require('./../lib/constraints/SelectionConstraint');
 const PolicyEngine = require('./../lib');
 
 const directoriesClient = {
@@ -39,6 +40,10 @@ const maximumConstraint = {
   apply: jest.fn(),
 };
 const parentChildConstraint = {
+  validate: jest.fn(),
+  apply: jest.fn(),
+};
+const selectionConstraint = {
   validate: jest.fn(),
   apply: jest.fn(),
 };
@@ -130,6 +135,10 @@ describe('when validating selected roles', () => {
     parentChildConstraint.apply.mockReset().mockReturnValue([]);
     parentChildConstraint.validate.mockReset().mockReturnValue([]);
     ParentChildConstraint.mockReset().mockImplementation(() => parentChildConstraint);
+
+    selectionConstraint.apply.mockReset().mockReturnValue([]);
+    selectionConstraint.validate.mockReset().mockReturnValue([]);
+    SelectionConstraint.mockReset().mockImplementation(() => selectionConstraint);
 
     engine = new PolicyEngine({
       directories: {
@@ -336,4 +345,39 @@ describe('when validating selected roles', () => {
     expect(actual[1]).toEqual(maximumConstraintError);
     expect(actual[2]).toEqual(parentChildConstraintError);
   });
+
+  it('then it should apply Selection constraint if configured for service', async () => {
+    applicationsClient.getService.mockReturnValue({
+      id: serviceId,
+      relyingParty: {
+        params: {
+          roleSelectionConstraint: true,
+        },
+      },
+    });
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(SelectionConstraint).toHaveBeenCalledTimes(1);
+    expect(SelectionConstraint).toHaveBeenCalledWith(allServiceRoles);
+    expect(selectionConstraint.validate).toHaveBeenCalledTimes(1);
+    expect(selectionConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
+  });
+
+  it('then it should not apply Selection constraint if not configured for service', async () => {
+    applicationsClient.getService.mockReturnValue({
+      id: serviceId,
+      relyingParty: {
+        params: {
+          minimumRolesRequired: 1,
+          maximumRolesAllowed: 2,
+        },
+      },
+    });
+
+    await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
+
+    expect(SelectionConstraint).toHaveBeenCalledTimes(0);
+    expect(selectionConstraint.validate).toHaveBeenCalledTimes(0);
+  });
+
 });
