@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/DFE-Digital/login.dfe.policy-engine#readme",
   "dependencies": {
+    "lodash": "^4.17.20",
     "login.dfe.async-retry": "github:DFE-Digital/login.dfe.async-retry#v2.0.1",
     "login.dfe.jwt-strategies": "github:DFE-Digital/login.dfe.jwt-strategies#v4.1.0"
   },
