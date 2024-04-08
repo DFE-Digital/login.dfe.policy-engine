@@ -1,6 +1,6 @@
 {
   "name": "login.dfe.policy-engine",
-  "version": "1.0.1",
+  "version": "3.1.0",
   "description": "Applies access policies to determine available roles for users",
   "main": "lib/index.js",
   "scripts": {
@@ -17,8 +17,9 @@
   },
   "homepage": "https://github.com/DFE-Digital/login.dfe.policy-engine#readme",
   "dependencies": {
-    "login.dfe.jwt-strategies": "https://github.com/DFE-Digital/login.dfe.jwt-strategies.git#v4.0.0",
-    "login.dfe.request-promise-retry": "git+https://github.com/DFE-Digital/login.dfe.request-promise-retry.git#v3.0.0"
+    "lodash": "^4.17.20",
+    "login.dfe.async-retry": "github:DFE-Digital/login.dfe.async-retry#v2.0.1",
+    "login.dfe.jwt-strategies": "github:DFE-Digital/login.dfe.jwt-strategies#v4.1.0"
   },
   "devDependencies": {
     "eslint": "^8.14.0",
