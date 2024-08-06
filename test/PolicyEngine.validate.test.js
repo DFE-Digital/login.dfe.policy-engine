@@ -5,6 +5,7 @@ jest.mock('./../lib/infrastructure/applications');
 jest.mock('./../lib/constraints/MinimumConstraint');
 jest.mock('./../lib/constraints/MaximumConstraint');
 jest.mock('./../lib/constraints/ParentChildConstraint');
+jest.mock('./../lib/constraints/SelectionConstraint');
 
 const DirectoriesClient = require('./../lib/infrastructure/directories');
 const OrganisationsClient = require('./../lib/infrastructure/organisations');
@@ -45,6 +46,7 @@ const parentChildConstraint = {
 };
 const selectionConstraint = {
   validate: jest.fn(),
+  apply: jest.fn(),
 };
 
 const allServiceRoles = [
@@ -135,8 +137,9 @@ describe('when validating selected roles', () => {
     parentChildConstraint.validate.mockReset().mockReturnValue([]);
     ParentChildConstraint.mockReset().mockImplementation(() => parentChildConstraint);
 
+    selectionConstraint.apply.mockReset().mockReturnValue([])
     selectionConstraint.validate.mockReset().mockReturnValue([]);
-    //SelectionConstraint.mockReset().mockImplementation(() => selectionConstraint);
+    SelectionConstraint.mockReset().mockImplementation(() => selectionConstraint);
 
     engine = new PolicyEngine({
       directories: {
@@ -361,7 +364,7 @@ describe('when validating selected roles', () => {
     expect(selectionConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
   });
 
-  it.skip('then it should not apply Selection constraint if not configured for service', async () => {
+  it('then it should not apply Selection constraint if not configured for service', async () => {
     applicationsClient.getService.mockReturnValue({
       id: serviceId,
       relyingParty: {
