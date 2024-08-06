@@ -4,7 +4,7 @@
   "description": "Applies access policies to determine available roles for users",
   "main": "lib/index.js",
   "scripts": {
-    "test": "./node_modules/.bin/jest"
+    "test": "jest --runInBand --coverage"
   },
   "repository": {
     "type": "git",
