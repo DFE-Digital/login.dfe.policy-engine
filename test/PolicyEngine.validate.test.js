@@ -352,14 +352,14 @@ describe('when validating selected roles', () => {
       id: serviceId,
       relyingParty: {
         params: {
-          roleSelectionConstraint: 'role-1,role-2',
+          roleSelectionConstraint: allServiceRoles[0].id + ',' + allServiceRoles[1].id,
         },
       },
     });
     await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
 
     expect(SelectionConstraint).toHaveBeenCalledTimes(1);
-    expect(SelectionConstraint).toHaveBeenCalledWith("role one", "role two");
+    expect(SelectionConstraint).toHaveBeenCalledWith(allServiceRoles[0].name, allServiceRoles[1].name);
     expect(selectionConstraint.validate).toHaveBeenCalledTimes(1);
     expect(selectionConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
   });
