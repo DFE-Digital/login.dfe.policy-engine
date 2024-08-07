@@ -14,7 +14,7 @@ describe('when validating selected roles against selection constraint', () => {
     expect(actual).toHaveLength(0);
   });
 
-  it('should not return exceptions if no selections are provided', () => {
+  it('should return exceptions if more than 1 selection is provided', () => {
     const firstRole = 'role-1';
     const secondRole = 'role-2';
     const constraint = new SelectionConstraint(firstRole, secondRole);
