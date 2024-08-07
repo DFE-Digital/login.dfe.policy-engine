@@ -5,6 +5,7 @@ jest.mock('./../lib/infrastructure/applications');
 jest.mock('./../lib/constraints/MinimumConstraint');
 jest.mock('./../lib/constraints/MaximumConstraint');
 jest.mock('./../lib/constraints/ParentChildConstraint');
+jest.mock('./../lib/constraints/SelectionConstraint');
 
 const DirectoriesClient = require('./../lib/infrastructure/directories');
 const OrganisationsClient = require('./../lib/infrastructure/organisations');
@@ -136,7 +137,7 @@ describe('when validating selected roles', () => {
     parentChildConstraint.validate.mockReset().mockReturnValue([]);
     ParentChildConstraint.mockReset().mockImplementation(() => parentChildConstraint);
 
-    selectionConstraint.apply.mockReset().mockReturnValue([]);
+    selectionConstraint.apply.mockReset().mockReturnValue([])
     selectionConstraint.validate.mockReset().mockReturnValue([]);
     SelectionConstraint.mockReset().mockImplementation(() => selectionConstraint);
 
@@ -351,14 +352,14 @@ describe('when validating selected roles', () => {
       id: serviceId,
       relyingParty: {
         params: {
-          roleSelectionConstraint: true,
+          roleSelectionConstraint: allServiceRoles[0].id + ',' + allServiceRoles[1].id,
         },
       },
     });
     await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
 
     expect(SelectionConstraint).toHaveBeenCalledTimes(1);
-    expect(SelectionConstraint).toHaveBeenCalledWith(allServiceRoles);
+    expect(SelectionConstraint).toHaveBeenCalledWith(allServiceRoles[0].name, allServiceRoles[1].name);
     expect(selectionConstraint.validate).toHaveBeenCalledTimes(1);
     expect(selectionConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
   });
