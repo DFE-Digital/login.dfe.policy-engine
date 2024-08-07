@@ -347,19 +347,19 @@ describe('when validating selected roles', () => {
     expect(actual[2]).toEqual(parentChildConstraintError);
   });
 
-  it.skip('then it should apply Selection constraint if configured for service', async () => {
+  it('then it should apply Selection constraint if configured for service', async () => {
     applicationsClient.getService.mockReturnValue({
       id: serviceId,
       relyingParty: {
         params: {
-          roleSelectionConstraint: true,
+          roleSelectionConstraint: 'role-1,role-2',
         },
       },
     });
     await engine.validate(userId, organisationId, serviceId, selectedRoleIds, correlationId);
 
     expect(SelectionConstraint).toHaveBeenCalledTimes(1);
-    expect(SelectionConstraint).toHaveBeenCalledWith(allServiceRoles);
+    expect(SelectionConstraint).toHaveBeenCalledWith("role one", "role two");
     expect(selectionConstraint.validate).toHaveBeenCalledTimes(1);
     expect(selectionConstraint.validate).toHaveBeenCalledWith(selectedRoleIds);
   });
