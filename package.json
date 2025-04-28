@@ -4,6 +4,7 @@
   "description": "Applies access policies to determine available roles for users",
   "main": "lib/index.js",
   "scripts": {
+    "format": "prettier . --write",
     "test": "jest --runInBand --coverage"
   },
   "repository": {
@@ -26,7 +27,8 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "jest": "^29.6.3",
-    "jest-cli": "^29.6.3"
+    "jest-cli": "^29.6.3",
+    "prettier": "^3.5.3"
   },
   "jest": {
     "testEnvironment": "node",
