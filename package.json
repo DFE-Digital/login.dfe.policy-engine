@@ -4,6 +4,10 @@
   "description": "Applies access policies to determine available roles for users",
   "main": "lib/index.js",
   "scripts": {
+    "dev:checks": "npm run lint && npm run test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:report": "eslint . -f junit -o eslint-results.xml",
     "format": "prettier . --write",
     "test": "jest --runInBand --coverage",
     "prepare": "husky"
@@ -27,9 +31,11 @@
     "login.dfe.jwt-strategies": "github:DFE-Digital/login.dfe.jwt-strategies#v4.1.1"
   },
   "devDependencies": {
-    "eslint": "^8.14.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0",
+    "@eslint/js": "^9.25.1",
+    "eslint": "^9.25.1",
+    "eslint-formatter-junit": "^8.40.0",
+    "eslint-plugin-jest": "^28.11.0",
+    "globals": "^16.0.0",
     "husky": "^9.1.7",
     "jest": "^29.6.3",
     "jest-cli": "^29.6.3",
