@@ -81,7 +81,6 @@ const serviceId = "service-1";
 const selectedRoleIds = [allServiceRoles[0].id, allServiceRoles[1].id];
 const correlationId = "correlation-id";
 
-const intentionalError = "ESLINT ERROR";
 describe("when validating selected roles", () => {
   let engine;
 
