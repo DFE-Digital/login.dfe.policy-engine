@@ -64,3 +64,6 @@ typings/
 \.idea/markdown-navigator/
 \.idea/workspace\.xml
 /debugging/
+
+eslint-results.xml
+junit.xml

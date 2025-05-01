@@ -1,19 +1,19 @@
-jest.mock('./../lib/infrastructure/directories');
-jest.mock('./../lib/infrastructure/organisations');
-jest.mock('./../lib/infrastructure/access');
-jest.mock('./../lib/infrastructure/applications');
-jest.mock('./../lib/constraints/MinimumConstraint');
-jest.mock('./../lib/constraints/MaximumConstraint');
-jest.mock('./../lib/constraints/ParentChildConstraint');
+jest.mock("./../lib/infrastructure/directories");
+jest.mock("./../lib/infrastructure/organisations");
+jest.mock("./../lib/infrastructure/access");
+jest.mock("./../lib/infrastructure/applications");
+jest.mock("./../lib/constraints/MinimumConstraint");
+jest.mock("./../lib/constraints/MaximumConstraint");
+jest.mock("./../lib/constraints/ParentChildConstraint");
 
-const DirectoriesClient = require('./../lib/infrastructure/directories');
-const OrganisationsClient = require('./../lib/infrastructure/organisations');
-const AccessClient = require('./../lib/infrastructure/access');
-const ApplicationsClient = require('./../lib/infrastructure/applications');
-const MinimumConstraint = require('./../lib/constraints/MinimumConstraint');
-const MaximumConstraint = require('./../lib/constraints/MaximumConstraint');
-const ParentChildConstraint = require('./../lib/constraints/ParentChildConstraint');
-const PolicyEngine = require('./../lib');
+const DirectoriesClient = require("./../lib/infrastructure/directories");
+const OrganisationsClient = require("./../lib/infrastructure/organisations");
+const AccessClient = require("./../lib/infrastructure/access");
+const ApplicationsClient = require("./../lib/infrastructure/applications");
+const MinimumConstraint = require("./../lib/constraints/MinimumConstraint");
+const MaximumConstraint = require("./../lib/constraints/MaximumConstraint");
+const ParentChildConstraint = require("./../lib/constraints/ParentChildConstraint");
+const PolicyEngine = require("./../lib");
 
 const directoriesClient = {
   getUserById: jest.fn(),
@@ -40,52 +40,58 @@ const parentChildConstraint = {
   apply: jest.fn(),
 };
 const allServiceRoles = [
-  { id: 'role-1', name: 'role one' },
-  { id: 'role-2', name: 'role two' },
-  { id: 'role-3', name: 'role three' },
+  { id: "role-1", name: "role one" },
+  { id: "role-2", name: "role two" },
+  { id: "role-3", name: "role three" },
 ];
 const user = {
-  sub: 'user-1',
-  email: 'user.one@unit.test',
+  sub: "user-1",
+  email: "user.one@unit.test",
 };
 const userOrganisations = [
   {
     organisation: {
-      id: 'organisation-1',
+      id: "organisation-1",
     },
     role: {
       id: 0,
-      name: 'End user',
+      name: "End user",
     },
   },
 ];
 const userAccessToService = {
-  userId: 'user-1',
-  organisationId: 'organisation-1',
-  serviceId: 'service-1',
-  roles: [
-    'role-1'
-  ]
+  userId: "user-1",
+  organisationId: "organisation-1",
+  serviceId: "service-1",
+  roles: ["role-1"],
 };
-const userId = 'user-1';
-const organisationId = 'organisation-1';
-const serviceId = 'service-1';
-const correlationId = 'correlation-id';
+const userId = "user-1";
+const organisationId = "organisation-1";
+const serviceId = "service-1";
+const correlationId = "correlation-id";
 
-describe('When getting available roles for a user', () => {
+describe("When getting available roles for a user", () => {
   let engine;
 
   beforeEach(() => {
     directoriesClient.getUserById.mockReset().mockReturnValue(user);
     DirectoriesClient.mockImplementation(() => directoriesClient);
 
-    organisationsClient.getUserOrganisations.mockReset().mockReturnValue(userOrganisations);
-    organisationsClient.getOrganisation.mockReset().mockReturnValue(userOrganisations[0].organisation);
+    organisationsClient.getUserOrganisations
+      .mockReset()
+      .mockReturnValue(userOrganisations);
+    organisationsClient.getOrganisation
+      .mockReset()
+      .mockReturnValue(userOrganisations[0].organisation);
     OrganisationsClient.mockImplementation(() => organisationsClient);
 
     accessClient.getPoliciesForService.mockReset();
-    accessClient.getUserAccessToServiceAtOrganisation.mockReset().mockReturnValue(userAccessToService);
-    accessClient.getRolesForService.mockReset().mockReturnValue(allServiceRoles);
+    accessClient.getUserAccessToServiceAtOrganisation
+      .mockReset()
+      .mockReturnValue(userAccessToService);
+    accessClient.getRolesForService
+      .mockReset()
+      .mockReturnValue(allServiceRoles);
     AccessClient.mockImplementation(() => accessClient);
 
     applicationsClient.getService.mockReset().mockReturnValue({
@@ -107,40 +113,47 @@ describe('When getting available roles for a user', () => {
     MaximumConstraint.mockReset().mockImplementation(() => maximumConstraint);
 
     parentChildConstraint.apply.mockReset().mockReturnValue([]);
-    ParentChildConstraint.mockReset().mockImplementation(() => parentChildConstraint);
+    ParentChildConstraint.mockReset().mockImplementation(
+      () => parentChildConstraint,
+    );
 
     engine = new PolicyEngine({
       directories: {
         service: {
-          url: 'https://directories.unit.test',
+          url: "https://directories.unit.test",
           auth: {},
-        }
+        },
       },
       organisations: {
         service: {
-          url: 'https://organisations.unit.test',
+          url: "https://organisations.unit.test",
           auth: {},
-        }
+        },
       },
       access: {
         service: {
-          url: 'https://access.unit.test',
+          url: "https://access.unit.test",
           auth: {},
-        }
+        },
       },
       applications: {
         service: {
-          url: 'https://applications.unit.test',
+          url: "https://applications.unit.test",
           auth: {},
-        }
+        },
       },
-    })
+    });
   });
 
-  it('then it should return all roles for service if no policies', async () => {
+  it("then it should return all roles for service if no policies", async () => {
     accessClient.getPoliciesForService.mockReturnValue([]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(userId, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      userId,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
       rolesAvailableToUser: allServiceRoles,
@@ -148,318 +161,324 @@ describe('When getting available roles for a user', () => {
     });
   });
 
-  it('then it should return no roles if user matches no policy', async () => {
+  it("then it should return no roles if user matches no policy", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'id',
-            operator: 'is',
-            value: ['another-user'],
+            field: "id",
+            operator: "is",
+            value: ["another-user"],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(userId, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      userId,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
       rolesAvailableToUser: [],
     });
   });
 
-  it('then it should return policy roles when user matches organisation criteria', async () => {
+  it("then it should return policy roles when user matches organisation criteria", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'organisation.id',
-            operator: 'is',
+            field: "organisation.id",
+            operator: "is",
             value: [organisationId],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(userId, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      userId,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
-      rolesAvailableToUser: [
-        allServiceRoles[0],
-        allServiceRoles[2],
-      ],
+      rolesAvailableToUser: [allServiceRoles[0], allServiceRoles[2]],
     });
   });
 
-  it('then it should return policy roles when user matches user criteria', async () => {
+  it("then it should return policy roles when user matches user criteria", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'id',
-            operator: 'is',
+            field: "id",
+            operator: "is",
             value: [userId],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(userId, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      userId,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
-      rolesAvailableToUser: [
-        allServiceRoles[0],
-        allServiceRoles[2],
-      ],
+      rolesAvailableToUser: [allServiceRoles[0], allServiceRoles[2]],
     });
   });
 
-  it('then it should return policy roles when user matches roles criteria', async () => {
+  it("then it should return policy roles when user matches roles criteria", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'roles',
-            operator: 'is',
+            field: "roles",
+            operator: "is",
             value: [userAccessToService.roles[0]],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(userId, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      userId,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
-      rolesAvailableToUser: [
-        allServiceRoles[0],
-        allServiceRoles[2],
-      ],
+      rolesAvailableToUser: [allServiceRoles[0], allServiceRoles[2]],
     });
   });
 
-  it('then it should not try and get user from directories if userId is undefined', async () => {
+  it("then it should not try and get user from directories if userId is undefined", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'organisation.id',
-            operator: 'is',
+            field: "organisation.id",
+            operator: "is",
             value: [organisationId],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[2]],
       },
     ]);
 
-    await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(directoriesClient.getUserById).toHaveBeenCalledTimes(0);
   });
 
-  it('then it should return policy roles when user matches organisation criteria and userId is undefined', async () => {
+  it("then it should return policy roles when user matches organisation criteria and userId is undefined", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'organisation.id',
-            operator: 'is',
+            field: "organisation.id",
+            operator: "is",
             value: [organisationId],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
-      rolesAvailableToUser: [
-        allServiceRoles[0],
-        allServiceRoles[2],
-      ],
+      rolesAvailableToUser: [allServiceRoles[0], allServiceRoles[2]],
     });
   });
 
-  it('then it should not return policy roles criteria is based on user and userId is undefined', async () => {
+  it("then it should not return policy roles criteria is based on user and userId is undefined", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'id',
-            operator: 'is',
+            field: "id",
+            operator: "is",
             value: [userId],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
       rolesAvailableToUser: [],
     });
   });
 
-  it('then it should treat no values as a false when applying conditions', async () => {
+  it("then it should treat no values as a false when applying conditions", async () => {
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'role.id',
-            operator: 'is_not',
-            value: 'something',
+            field: "role.id",
+            operator: "is_not",
+            value: "something",
           },
         ],
-        roles: [
-          allServiceRoles[0],
-        ],
+        roles: [allServiceRoles[0]],
       },
     ]);
-    accessClient.getUserAccessToServiceAtOrganisation.mockReset().mockReturnValue({
-      userId: 'user-1',
-      organisationId: 'organisation-1',
-      serviceId: 'service-1',
-      roles: []
-    });
+    accessClient.getUserAccessToServiceAtOrganisation
+      .mockReset()
+      .mockReturnValue({
+        userId: "user-1",
+        organisationId: "organisation-1",
+        serviceId: "service-1",
+        roles: [],
+      });
 
-    const actual = await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
-      rolesAvailableToUser: [
-        allServiceRoles[0],
-      ],
+      rolesAvailableToUser: [allServiceRoles[0]],
     });
   });
 
-  it('then it should remove roles that violate a single constraint', async () => {
+  it("then it should remove roles that violate a single constraint", async () => {
     parentChildConstraint.apply.mockImplementation((availableRoles) => {
-      return availableRoles.filter(x => x === 'role-1');
+      return availableRoles.filter((x) => x === "role-1");
     });
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'organisation.id',
-            operator: 'is',
+            field: "organisation.id",
+            operator: "is",
             value: [organisationId],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[1],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[1], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
-      rolesAvailableToUser: [
-        allServiceRoles[1],
-        allServiceRoles[2],
-      ],
+      rolesAvailableToUser: [allServiceRoles[1], allServiceRoles[2]],
     });
   });
 
-  it('then it should remove roles that violate multiple constraints', async () => {
+  it("then it should remove roles that violate multiple constraints", async () => {
     minimumConstraint.apply.mockImplementation((availableRoles) => {
-      return availableRoles.find(x => x === 'role-1') ? [] : availableRoles;
+      return availableRoles.find((x) => x === "role-1") ? [] : availableRoles;
     });
     parentChildConstraint.apply.mockImplementation((availableRoles) => {
-      return availableRoles.filter(x => x === 'role-1');
+      return availableRoles.filter((x) => x === "role-1");
     });
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'organisation.id',
-            operator: 'is',
+            field: "organisation.id",
+            operator: "is",
             value: [organisationId],
           },
         ],
-        roles: [
-          allServiceRoles[0],
-          allServiceRoles[1],
-          allServiceRoles[2],
-        ],
+        roles: [allServiceRoles[0], allServiceRoles[1], allServiceRoles[2]],
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
       rolesAvailableToUser: [],
     });
   });
 
-  it('then it should make service unavailable to user if constraints and no roles', async () => {
-    parentChildConstraint.apply.mockImplementation(availableRoles => availableRoles);
+  it("then it should make service unavailable to user if constraints and no roles", async () => {
+    parentChildConstraint.apply.mockImplementation(
+      (availableRoles) => availableRoles,
+    );
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'organisation.id',
-            operator: 'is',
+            field: "organisation.id",
+            operator: "is",
             value: [organisationId],
           },
         ],
@@ -467,7 +486,12 @@ describe('When getting available roles for a user', () => {
       },
     ]);
 
-    const actual = await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
       rolesAvailableToUser: [],
@@ -475,17 +499,19 @@ describe('When getting available roles for a user', () => {
     });
   });
 
-  it('then it should make service available to user if no roles but no constraints', async () => {
-    parentChildConstraint.apply.mockImplementation(availableRoles => availableRoles);
+  it("then it should make service available to user if no roles but no constraints", async () => {
+    parentChildConstraint.apply.mockImplementation(
+      (availableRoles) => availableRoles,
+    );
     accessClient.getPoliciesForService.mockReturnValue([
       {
-        id: 'policy-1',
-        name: 'policy one',
+        id: "policy-1",
+        name: "policy one",
         applicationId: serviceId,
         conditions: [
           {
-            field: 'organisation.id',
-            operator: 'is',
+            field: "organisation.id",
+            operator: "is",
             value: [organisationId],
           },
         ],
@@ -495,12 +521,16 @@ describe('When getting available roles for a user', () => {
     applicationsClient.getService.mockReset().mockReturnValue({
       id: serviceId,
       relyingParty: {
-        params: {
-        },
+        params: {},
       },
     });
 
-    const actual = await engine.getPolicyApplicationResultsForUser(undefined, organisationId, serviceId, correlationId);
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      serviceId,
+      correlationId,
+    );
 
     expect(actual).toMatchObject({
       rolesAvailableToUser: [],
