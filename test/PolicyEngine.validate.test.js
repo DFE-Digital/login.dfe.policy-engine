@@ -490,4 +490,65 @@ describe("when validating selected roles", () => {
     expect(SelectionConstraint).toHaveBeenCalledTimes(0);
     expect(selectionConstraint.validate).toHaveBeenCalledTimes(0);
   });
+
+  it("then it should call getUserAccessToServiceAtOrganisation if the user ID is passed in and the service has policies", async () => {
+    accessClient.getPoliciesForService.mockReturnValue([
+      {
+        id: "policy-1",
+        name: "policy one",
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: "organisation.id",
+            operator: "is",
+            value: [organisationId],
+          },
+        ],
+        roles: [],
+      },
+    ]);
+    await engine.validate(
+      userId,
+      organisationId,
+      serviceId,
+      selectedRoleIds,
+      correlationId,
+    );
+
+    expect(
+      accessClient.getUserAccessToServiceAtOrganisation,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      accessClient.getUserAccessToServiceAtOrganisation,
+    ).toHaveBeenCalledWith(userId, organisationId, serviceId, correlationId);
+  });
+
+  it("then it should not call getUserAccessToServiceAtOrganisation if the user ID is not passed in and the service has policies", async () => {
+    accessClient.getPoliciesForService.mockReturnValue([
+      {
+        id: "policy-1",
+        name: "policy one",
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: "organisation.id",
+            operator: "is",
+            value: [organisationId],
+          },
+        ],
+        roles: [],
+      },
+    ]);
+    await engine.validate(
+      undefined,
+      organisationId,
+      serviceId,
+      selectedRoleIds,
+      correlationId,
+    );
+
+    expect(
+      accessClient.getUserAccessToServiceAtOrganisation,
+    ).not.toHaveBeenCalled();
+  });
 });
