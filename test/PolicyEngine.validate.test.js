@@ -85,18 +85,18 @@ describe("when validating selected roles", () => {
   let engine;
 
   beforeEach(() => {
-    directoriesClient.getUserById.mockReset().mockReturnValue(user);
+    directoriesClient.getUserById.mockReset().mockResolvedValue(user);
     DirectoriesClient.mockImplementation(() => directoriesClient);
 
     organisationsClient.getUserOrganisations
       .mockReset()
-      .mockReturnValue(userOrganisations);
+      .mockResolvedValue(userOrganisations);
     organisationsClient.getOrganisation
       .mockReset()
-      .mockReturnValue(userOrganisations[0].organisation);
+      .mockResolvedValue(userOrganisations[0].organisation);
     OrganisationsClient.mockImplementation(() => organisationsClient);
 
-    accessClient.getPoliciesForService.mockReset().mockReturnValue([
+    accessClient.getPoliciesForService.mockReset().mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -113,13 +113,13 @@ describe("when validating selected roles", () => {
     ]);
     accessClient.getUserAccessToServiceAtOrganisation
       .mockReset()
-      .mockReturnValue(userAccessToService);
+      .mockResolvedValue(userAccessToService);
     accessClient.getRolesForService
       .mockReset()
-      .mockReturnValue(allServiceRoles);
+      .mockResolvedValue(allServiceRoles);
     AccessClient.mockImplementation(() => accessClient);
 
-    applicationsClient.getService.mockReset().mockReturnValue({
+    applicationsClient.getService.mockReset().mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {
@@ -233,7 +233,7 @@ describe("when validating selected roles", () => {
   });
 
   it("then it should not apply minimum constraint if not configured for service", async () => {
-    applicationsClient.getService.mockReturnValue({
+    applicationsClient.getService.mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {
@@ -294,7 +294,7 @@ describe("when validating selected roles", () => {
   });
 
   it("then it should not apply maximum constraint if not configured for service", async () => {
-    applicationsClient.getService.mockReturnValue({
+    applicationsClient.getService.mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {
@@ -357,7 +357,7 @@ describe("when validating selected roles", () => {
   });
 
   it("then it should not apply parent/child constraint if not configured for service", async () => {
-    applicationsClient.getService.mockReturnValue({
+    applicationsClient.getService.mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {
@@ -442,7 +442,7 @@ describe("when validating selected roles", () => {
   });
 
   it("then it should apply Selection constraint if configured for service", async () => {
-    applicationsClient.getService.mockReturnValue({
+    applicationsClient.getService.mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {
@@ -469,7 +469,7 @@ describe("when validating selected roles", () => {
   });
 
   it("then it should not apply Selection constraint if not configured for service", async () => {
-    applicationsClient.getService.mockReturnValue({
+    applicationsClient.getService.mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {
@@ -489,5 +489,66 @@ describe("when validating selected roles", () => {
 
     expect(SelectionConstraint).toHaveBeenCalledTimes(0);
     expect(selectionConstraint.validate).toHaveBeenCalledTimes(0);
+  });
+
+  it("then it should call getUserAccessToServiceAtOrganisation if the user ID is passed in and the service has policies", async () => {
+    accessClient.getPoliciesForService.mockResolvedValue([
+      {
+        id: "policy-1",
+        name: "policy one",
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: "organisation.id",
+            operator: "is",
+            value: [organisationId],
+          },
+        ],
+        roles: [],
+      },
+    ]);
+    await engine.validate(
+      userId,
+      organisationId,
+      serviceId,
+      selectedRoleIds,
+      correlationId,
+    );
+
+    expect(
+      accessClient.getUserAccessToServiceAtOrganisation,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      accessClient.getUserAccessToServiceAtOrganisation,
+    ).toHaveBeenCalledWith(userId, organisationId, serviceId, correlationId);
+  });
+
+  it("then it should not call getUserAccessToServiceAtOrganisation if the user ID is not passed in and the service has policies", async () => {
+    accessClient.getPoliciesForService.mockResolvedValue([
+      {
+        id: "policy-1",
+        name: "policy one",
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: "organisation.id",
+            operator: "is",
+            value: [organisationId],
+          },
+        ],
+        roles: [],
+      },
+    ]);
+    await engine.validate(
+      undefined,
+      organisationId,
+      serviceId,
+      selectedRoleIds,
+      correlationId,
+    );
+
+    expect(
+      accessClient.getUserAccessToServiceAtOrganisation,
+    ).not.toHaveBeenCalled();
   });
 });
