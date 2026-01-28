@@ -1,3 +1,8 @@
+jest.mock("login.dfe.api-client/api/setup", () => ({
+  setupApi: jest.fn(),
+}));
+
+const { setupApi } = require("login.dfe.api-client/api/setup");
 const PolicyEngine = require("./../lib");
 
 const correctConfig = {
@@ -156,5 +161,23 @@ describe("when creating instance of PolicyEngine", () => {
     expect(() => new PolicyEngine(config)).toThrowError(
       "access.service.auth must be specified",
     );
+  });
+
+  it("does not call setupApi when registerApiClient is false", () => {
+    const config = JSON.parse(JSON.stringify(correctConfig));
+    new PolicyEngine(config, { registerApiClient: false });
+    expect(setupApi).not.toHaveBeenCalled();
+  });
+
+  it("does not call setupApi when options isn't provided", () => {
+    const config = JSON.parse(JSON.stringify(correctConfig));
+    new PolicyEngine(config);
+    expect(setupApi).not.toHaveBeenCalled();
+  });
+
+  it("does call setupApi when options is provided", () => {
+    const config = JSON.parse(JSON.stringify(correctConfig));
+    new PolicyEngine(config, { registerApiClient: true });
+    expect(setupApi).toHaveBeenCalledTimes(1);
   });
 });

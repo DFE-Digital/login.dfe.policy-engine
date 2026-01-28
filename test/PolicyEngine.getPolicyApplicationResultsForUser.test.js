@@ -1,35 +1,43 @@
-jest.mock("./../lib/infrastructure/directories");
-jest.mock("./../lib/infrastructure/organisations");
-jest.mock("./../lib/infrastructure/access");
-jest.mock("./../lib/infrastructure/applications");
+jest.mock("login.dfe.api-client/api/setup");
+
+jest.mock("login.dfe.api-client/services", () => ({
+  getServiceRaw: jest.fn(),
+  getServiceRolesRaw: jest.fn(),
+  getServicePoliciesRaw: jest.fn(),
+}));
+
+jest.mock("login.dfe.api-client/users", () => ({
+  getUserRaw: jest.fn(),
+  getUserServiceRaw: jest.fn(),
+  getUserOrganisationsRaw: jest.fn(),
+}));
+
+jest.mock("login.dfe.api-client/organisations", () => ({
+  getOrganisationRaw: jest.fn(),
+}));
+
 jest.mock("./../lib/constraints/MinimumConstraint");
 jest.mock("./../lib/constraints/MaximumConstraint");
 jest.mock("./../lib/constraints/ParentChildConstraint");
 
-const DirectoriesClient = require("./../lib/infrastructure/directories");
-const OrganisationsClient = require("./../lib/infrastructure/organisations");
-const AccessClient = require("./../lib/infrastructure/access");
-const ApplicationsClient = require("./../lib/infrastructure/applications");
 const MinimumConstraint = require("./../lib/constraints/MinimumConstraint");
 const MaximumConstraint = require("./../lib/constraints/MaximumConstraint");
 const ParentChildConstraint = require("./../lib/constraints/ParentChildConstraint");
 const PolicyEngine = require("./../lib");
 
-const directoriesClient = {
-  getUserById: jest.fn(),
-};
-const organisationsClient = {
-  getUserOrganisations: jest.fn(),
-  getOrganisation: jest.fn(),
-};
-const accessClient = {
-  getPoliciesForService: jest.fn(),
-  getUserAccessToServiceAtOrganisation: jest.fn(),
-  getRolesForService: jest.fn(),
-};
-const applicationsClient = {
-  getService: jest.fn(),
-};
+const {
+  getServiceRaw,
+  getServiceRolesRaw,
+  getServicePoliciesRaw,
+} = require("login.dfe.api-client/services");
+const {
+  getUserRaw,
+  getUserServiceRaw,
+  getUserOrganisationsRaw,
+} = require("login.dfe.api-client/users");
+
+const { getOrganisationRaw } = require("login.dfe.api-client/organisations");
+
 const minimumConstraint = {
   apply: jest.fn(),
 };
@@ -74,27 +82,21 @@ describe("When getting available roles for a user", () => {
   let engine;
 
   beforeEach(() => {
-    directoriesClient.getUserById.mockReset().mockResolvedValue(user);
-    DirectoriesClient.mockImplementation(() => directoriesClient);
+    getUserRaw.mockReset().mockResolvedValue(user);
 
-    organisationsClient.getUserOrganisations
-      .mockReset()
-      .mockResolvedValue(userOrganisations);
-    organisationsClient.getOrganisation
+    getUserOrganisationsRaw.mockReset().mockResolvedValue(userOrganisations);
+
+    getOrganisationRaw
       .mockReset()
       .mockResolvedValue(userOrganisations[0].organisation);
-    OrganisationsClient.mockImplementation(() => organisationsClient);
 
-    accessClient.getPoliciesForService.mockReset();
-    accessClient.getUserAccessToServiceAtOrganisation
-      .mockReset()
-      .mockResolvedValue(userAccessToService);
-    accessClient.getRolesForService
-      .mockReset()
-      .mockResolvedValue(allServiceRoles);
-    AccessClient.mockImplementation(() => accessClient);
+    getServicePoliciesRaw.mockReset();
 
-    applicationsClient.getService.mockReset().mockResolvedValue({
+    getUserServiceRaw.mockReset().mockResolvedValue(userAccessToService);
+
+    getServiceRolesRaw.mockReset().mockResolvedValue(allServiceRoles);
+
+    getServiceRaw.mockReset().mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {
@@ -104,7 +106,6 @@ describe("When getting available roles for a user", () => {
         },
       },
     });
-    ApplicationsClient.mockImplementation(() => applicationsClient);
 
     minimumConstraint.apply.mockReset().mockReturnValue([]);
     MinimumConstraint.mockReset().mockImplementation(() => minimumConstraint);
@@ -146,7 +147,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should return all roles for service if no policies", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([]);
+    getServicePoliciesRaw.mockResolvedValue([]);
 
     const actual = await engine.getPolicyApplicationResultsForUser(
       userId,
@@ -165,7 +166,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should return no roles if user matches no policy", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -197,7 +198,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should return policy roles when user matches organisation criteria", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -229,7 +230,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should return policy roles when user matches user criteria", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -274,7 +275,7 @@ describe("When getting available roles for a user", () => {
       ],
       roles: [allServiceRoles[0], allServiceRoles[2]],
     };
-    accessClient.getPoliciesForService.mockResolvedValue([policy]);
+    getServicePoliciesRaw.mockResolvedValue([policy]);
 
     const actual = await engine.getPolicyApplicationResultsForUser(
       userId,
@@ -293,7 +294,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should not try and get user from directories if userId is undefined", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -316,11 +317,11 @@ describe("When getting available roles for a user", () => {
       correlationId,
     );
 
-    expect(directoriesClient.getUserById).toHaveBeenCalledTimes(0);
+    expect(getUserRaw).toHaveBeenCalledTimes(0);
   });
 
   it("then it should return policy roles when user matches organisation criteria and userId is undefined", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -352,7 +353,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should not return policy roles criteria is based on user and userId is undefined", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -384,7 +385,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should treat no values as a false when applying conditions", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -399,14 +400,12 @@ describe("When getting available roles for a user", () => {
         roles: [allServiceRoles[0]],
       },
     ]);
-    accessClient.getUserAccessToServiceAtOrganisation
-      .mockReset()
-      .mockResolvedValue({
-        userId: "user-1",
-        organisationId: "organisation-1",
-        serviceId: "service-1",
-        roles: [],
-      });
+    getUserServiceRaw.mockReset().mockResolvedValue({
+      userId: "user-1",
+      organisationId: "organisation-1",
+      serviceId: "service-1",
+      roles: [],
+    });
 
     const actual = await engine.getPolicyApplicationResultsForUser(
       undefined,
@@ -427,7 +426,7 @@ describe("When getting available roles for a user", () => {
     parentChildConstraint.apply.mockImplementation((availableRoles) => {
       return availableRoles.filter((x) => x === "role-1");
     });
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -465,7 +464,7 @@ describe("When getting available roles for a user", () => {
     parentChildConstraint.apply.mockImplementation((availableRoles) => {
       return availableRoles.filter((x) => x === "role-1");
     });
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -500,7 +499,7 @@ describe("When getting available roles for a user", () => {
     parentChildConstraint.apply.mockImplementation(
       (availableRoles) => availableRoles,
     );
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -536,7 +535,7 @@ describe("When getting available roles for a user", () => {
     parentChildConstraint.apply.mockImplementation(
       (availableRoles) => availableRoles,
     );
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -551,7 +550,7 @@ describe("When getting available roles for a user", () => {
         roles: [],
       },
     ]);
-    applicationsClient.getService.mockReset().mockResolvedValue({
+    getServiceRaw.mockReset().mockResolvedValue({
       id: serviceId,
       relyingParty: {
         params: {},
@@ -575,7 +574,7 @@ describe("When getting available roles for a user", () => {
   });
 
   it("then it should call getUserAccessToServiceAtOrganisation for each service if the user ID is passed in and the services have policies", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -597,19 +596,21 @@ describe("When getting available roles for a user", () => {
       correlationId,
     );
 
-    expect(
-      accessClient.getUserAccessToServiceAtOrganisation,
-    ).toHaveBeenCalledTimes(2);
-    expect(
-      accessClient.getUserAccessToServiceAtOrganisation,
-    ).toHaveBeenCalledWith(userId, organisationId, serviceId, correlationId);
-    expect(
-      accessClient.getUserAccessToServiceAtOrganisation,
-    ).toHaveBeenCalledWith(userId, organisationId, "service-2", correlationId);
+    expect(getUserServiceRaw).toHaveBeenCalledTimes(2);
+    expect(getUserServiceRaw).toHaveBeenCalledWith({
+      userId,
+      organisationId,
+      serviceId,
+    });
+    expect(getUserServiceRaw).toHaveBeenCalledWith({
+      userId,
+      organisationId,
+      serviceId: "service-2",
+    });
   });
 
   it("then it should not call getUserAccessToServiceAtOrganisation if the user ID is not passed in and the services have policies", async () => {
-    accessClient.getPoliciesForService.mockResolvedValue([
+    getServicePoliciesRaw.mockResolvedValue([
       {
         id: "policy-1",
         name: "policy one",
@@ -632,8 +633,6 @@ describe("When getting available roles for a user", () => {
       correlationId,
     );
 
-    expect(
-      accessClient.getUserAccessToServiceAtOrganisation,
-    ).not.toHaveBeenCalled();
+    expect(getUserServiceRaw).not.toHaveBeenCalled();
   });
 });
