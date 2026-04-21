@@ -655,4 +655,114 @@ describe("When getting available roles for a user", () => {
 
     expect(getUserServiceRaw).not.toHaveBeenCalled();
   });
+
+  it("then it should return policy roles when organisation ukprn matches starts_with condition", async () => {
+    getOrganisationRaw.mockResolvedValue({
+      id: organisationId,
+      ukprn: "10070901",
+    });
+    getServicePoliciesRaw.mockResolvedValue([
+      {
+        id: "policy-1",
+        name: "policy one",
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: "organisation.ukprn",
+            operator: "starts_with",
+            value: ["1"],
+          },
+        ],
+        roles: [allServiceRoles[0], allServiceRoles[1]],
+      },
+    ]);
+
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      [serviceId],
+      correlationId,
+    );
+
+    expect(actual).toMatchObject([
+      {
+        id: serviceId,
+        rolesAvailableToUser: [allServiceRoles[0], allServiceRoles[1]],
+        serviceAvailableToUser: true,
+      },
+    ]);
+  });
+
+  it("then it should not return policy roles when organisation ukprn does not match starts_with condition", async () => {
+    getOrganisationRaw.mockResolvedValue({
+      id: organisationId,
+      ukprn: "20070901",
+    });
+    getServicePoliciesRaw.mockResolvedValue([
+      {
+        id: "policy-1",
+        name: "policy one",
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: "organisation.ukprn",
+            operator: "starts_with",
+            value: ["1"],
+          },
+        ],
+        roles: [allServiceRoles[0], allServiceRoles[1]],
+      },
+    ]);
+
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      [serviceId],
+      correlationId,
+    );
+
+    expect(actual).toMatchObject([
+      {
+        id: serviceId,
+        rolesAvailableToUser: [],
+        serviceAvailableToUser: false,
+      },
+    ]);
+  });
+
+  it("then it should not return policy roles when organisation ukprn is absent and starts_with condition is set", async () => {
+    getOrganisationRaw.mockResolvedValue({
+      id: organisationId,
+    });
+    getServicePoliciesRaw.mockResolvedValue([
+      {
+        id: "policy-1",
+        name: "policy one",
+        applicationId: serviceId,
+        conditions: [
+          {
+            field: "organisation.ukprn",
+            operator: "starts_with",
+            value: ["1"],
+          },
+        ],
+        roles: [allServiceRoles[0], allServiceRoles[1]],
+      },
+    ]);
+
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      undefined,
+      organisationId,
+      [serviceId],
+      correlationId,
+    );
+
+    expect(actual).toMatchObject([
+      {
+        id: serviceId,
+        rolesAvailableToUser: [],
+        serviceAvailableToUser: false,
+      },
+    ]);
+  });
 });
