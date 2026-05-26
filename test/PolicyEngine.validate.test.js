@@ -550,4 +550,19 @@ describe("when validating selected roles", () => {
 
     expect(getUserServiceRaw).not.toHaveBeenCalled();
   });
+
+  it("then it should not throw and return no validation errors when getServiceRaw returns undefined", async () => {
+    getServiceRaw.mockReset().mockResolvedValue(undefined);
+    getServicePoliciesRaw.mockResolvedValue([]);
+
+    const actual = await engine.validate(
+      userId,
+      organisationId,
+      serviceId,
+      [],
+      correlationId,
+    );
+
+    expect(actual).toEqual([]);
+  });
 });

@@ -609,6 +609,26 @@ describe("When getting available roles for a user", () => {
     });
   });
 
+  it("then it should not throw and treat the service as unconstrained when getServiceRaw returns undefined", async () => {
+    getServiceRaw.mockReset().mockResolvedValue(undefined);
+    getServicePoliciesRaw.mockResolvedValue([]);
+
+    const actual = await engine.getPolicyApplicationResultsForUser(
+      userId,
+      organisationId,
+      [serviceId],
+      correlationId,
+    );
+
+    expect(actual).toMatchObject([
+      {
+        id: serviceId,
+        rolesAvailableToUser: allServiceRoles,
+        serviceAvailableToUser: true,
+      },
+    ]);
+  });
+
   it("then it should not call getUserAccessToServiceAtOrganisation if the user ID is not passed in and the services have policies", async () => {
     getServicePoliciesRaw.mockResolvedValue([
       {
