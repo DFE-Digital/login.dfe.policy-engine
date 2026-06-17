@@ -1,6 +1,6 @@
 {
   "name": "login.dfe.policy-engine",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "description": "Applies access policies to determine available roles for users",
   "main": "lib/index.js",
   "scripts": {
