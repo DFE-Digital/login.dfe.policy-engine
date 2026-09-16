@@ -1,6 +1,6 @@
 {
   "name": "login.dfe.policy-engine",
-  "version": "5.0.4",
+  "version": "5.0.5",
   "description": "Applies access policies to determine available roles for users",
   "main": "lib/index.js",
   "scripts": {
@@ -28,7 +28,7 @@
   "homepage": "https://github.com/DFE-Digital/login.dfe.policy-engine#readme",
   "dependencies": {
     "lodash": "^4.17.21",
-    "login.dfe.api-client": "^1.0.59"
+    "login.dfe.api-client": "^2.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
